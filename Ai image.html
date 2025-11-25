@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #generated-image {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Image Generator</h1>
+    <p>Masukkan deskripsi dan klik "Generate" untuk membuat gambar AI</p>
+    <input type="text" id="description" placeholder="Contoh: A futuristic city skyline">
+    <button onclick="generateImage()">Generate</button>
+
+    <div id="loader" style="display: none;">Memuat...</div>
+    <img id="generated-image" style="display: none;" />
+
+    <script>
+        async function generateImage() {
+            const description = document.getElementById('description').value;
+            const loader = document.getElementById('loader');
+            const imageElement = document.getElementById('generated-image');
+            
+            if (!description) {
+                alert("Tolong masukkan deskripsi!");
+                return;
+            }
+            
+            loader.style.display = 'block'; // Tampilkan loader
+            
+            const apiKey = 'API_KEY_ANDA'; // Ganti dengan API key Anda
+            const apiUrl = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    inputs: description,
+                    options: {
+                        use_cache: false
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            loader.style.display = 'none'; // Sembunyikan loader
+
+            if (data && data[0] && data[0].image) {
+                imageElement.style.display = 'block'; // Tampilkan gambar
+                imageElement.src = 'data:image/png;base64,' + data[0].image;
+            } else {
+                alert('Gagal menghasilkan gambar. Coba lagi!');
+            }
+        }
+    </script>
+</body>
+</html>
